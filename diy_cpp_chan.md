@@ -2,7 +2,7 @@
 #### Posted July 18th, 11:00 AM
 
 ### Intro
-From my perspective, Channel semantics is one of the things that Go got mostly right. Luckily; comparable functionality is only a dynamic array, a mutex and a pair of condition-variables away in any language. This post describes a take on that idea in 100 lines of portable C++, from the database I wrote for [Snackis](https://github.com/andreas-gone-wild/snackis); it doesn't implement select, but provides non-blocking operations as a solution to some of the same problems.
+From my perspective, Channel semantics is one of the things that Go got mostly right. Luckily; comparable functionality is only a dynamic array, a mutex and a pair of condition-variables away in any language. This post describes a take on that idea in 100 lines of portable C++, from the database I wrote for [Snackis](https://github.com/andreas-gone-wild/snackis); it doesn't implement select, but provides non-blocking operations to help solve some of the same problems.
 
 ### Implementation
 This implementation uses an atomic variable to enable a lock-free fast path; it's optional, but quadruples performance.
