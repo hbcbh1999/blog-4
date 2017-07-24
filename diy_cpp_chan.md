@@ -234,6 +234,7 @@ func main() {
 }
 ```
 
+### Outro
 You may find a full implementation of this idea and more [here](https://github.com/andreas-gone-wild/snackis). If you're looking for real-world use, Snackis main database [event-loop](https://github.com/andreas-gone-wild/snackis/blob/master/src/snackis/db/proc.cpp) is a good place to start. If you wish to run the benchmark yourself, you may find both versions [here](https://github.com/andreas-gone-wild/snackis/tree/master/src); regular [build instructions](https://github.com/andreas-gone-wild/snackis#building) apply for C++, the name of the target is ```chan_perf```; please consider sharing your findings.
 
 Until next time; be well,<br/>
