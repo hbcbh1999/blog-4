@@ -32,7 +32,7 @@ const int CHAN_RETRIES(10);
 
 template <typename T>
 Chan<T>::Chan(size_t max):
-  max(max), pos(0), size(0), closed(false)
+  max(max), size(0), closed(false)
 { }
 
 template <typename T>
