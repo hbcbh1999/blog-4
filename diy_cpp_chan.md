@@ -2,23 +2,22 @@
 #### Posted July 18th, 11:00 AM
 
 ### Intro
-From my perspective, Channel semantics is one of the things that Go got mostly right. Luckily; comparable functionality is only a dynamic array, a mutex and a pair of condition-variables away in any language. This post describes a take on that idea in 100 lines of portable C++, from the database I wrote for [Snackis](https://github.com/andreas-gone-wild/snackis); it doesn't implement select, but provides non-blocking operations to help solve some of the same problems.
+From my perspective, Channel semantics is one of the things that Go got right. Luckily; comparable functionality is only a deque, a mutex and a pair of condition-variables away in any language. This post describes a take on that idea in 100 lines of portable C++; it doesn't implement select, but provides non-blocking operations to help solve some of the same problems.
 
 ### Implementation
-The implementation below uses an atomic variable to provide a lock-free fast path; it's optional, but quadruples performance.
+This implementation uses an atomic variable to provide a lock-free fast path; it's optional, but quadruples performance.
 
 ```
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <optional>
-#include <vector>
+#include <deque>
 
 template <typename T>
 struct Chan {
   const size_t max;
-  std::vector<T> buf;
-  size_t pos;
+  std::deque<T> buf;
   std::atomic<size_t> size;
   std::mutex mutex;
   std::condition_variable get_ok, put_ok;
@@ -85,19 +84,13 @@ std::optional<T> get(Chan<T> &c, bool wait=true) {
 
   ChanLock lock(c.mutex);
     
-  if (wait && c.pos == c.buf.size()) {
-    c.get_ok.wait(lock, [&c](){ return c.closed || c.pos < c.buf.size(); });
+  if (wait && c.buf.empty()) {
+    c.get_ok.wait(lock, [&c](){ return c.closed || !c.buf.empty(); });
   }
     
-  if (c.pos == c.buf.size()) { return nullopt; }
-  auto out(c.buf[c.pos]);
-  c.pos++;
-
-  if (c.pos == c.buf.size()) {
-    c.buf.clear();
-    c.pos = 0;
-  }
-
+  if (c.buf.empty()) { return nullopt; }
+  auto out(c.buf.front());
+  c.buf.pop_front();
   c.size--;
   c.put_ok.notify_one();
   return out;
@@ -125,7 +118,7 @@ close(c);
 ```
 
 ### Performance
-The implementation above is fast enough for many needs but I was still curious how it stacked up against Go, so I wrote a basic benchmark loop to get an idea. The short story is that it's about twice as fast as the built-in channels in Go 1.8.3
+The short story is that the implementation described here is about twice as fast as the built-in channels in Go 1.8.3.
 
 ```
 #include <vector>
