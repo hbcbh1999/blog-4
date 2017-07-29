@@ -10,9 +10,9 @@ This implementation uses an atomic variable to provide a lock-free fast path; it
 ```
 #include <atomic>
 #include <condition_variable>
+#include <deque>
 #include <mutex>
 #include <optional>
-#include <deque>
 
 template <typename T>
 struct Chan {
